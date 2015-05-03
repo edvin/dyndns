@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>no.tornado</groupId>
+    <artifactId>dyndns</artifactId>
+    <name>Tornado DynDNS</name>
+
+    <packaging>jar</packaging>
+    <version>1.0</version>
+
+    <organization>
+        <!-- Used as the 'Vendor' for JNLP generation -->
+        <name>Tornado</name>
+    </organization>
+
+    <developers>
+        <developer>
+            <id>edvin</id>
+            <email>es@syse.no</email>
+            <name>Edvin Syse</name>
+            <organization>SYSE AS</organization>
+            <organizationUrl>https://www.syse.no/</organizationUrl>
+            <timezone>GMT+2</timezone>
+        </developer>
+    </developers>
+
+    <repositories>
+        <repository>
+            <id>no.tornado</id>
+            <name>Tornado Nexus Repository</name>
+            <url>http://tornado.no:1080/nexus/content/repositories/releases</url>
+        </repository>
+    </repositories>
+
+    <build>
+        <finalName>Tornado DynDNS</finalName>
+        <plugins>
+            <plugin>
+                <groupId>com.zenjava</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>8.1.2</version>
+                <configuration>
+                    <mainClass>no.tornado.MainApp</mainClass>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.dnsjava</groupId>
+            <artifactId>dnsjava</artifactId>
+            <version>2.1.7</version>
+        </dependency>
+    </dependencies>
+
+</project>
