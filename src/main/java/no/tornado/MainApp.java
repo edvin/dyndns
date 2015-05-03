@@ -46,6 +46,7 @@ public class MainApp extends Application {
 			URL imageLoc = getClass().getResource("/images/tornado_icon_gray.png");
 			Image image = ImageIO.read(imageLoc);
 			TrayIcon trayIcon = new TrayIcon(image);
+			trayIcon.setImageAutoSize(true);
 
 			// if the user double-clicks on the tray icon, show the main app stage.
 			trayIcon.addActionListener(event -> javafx.application.Platform.runLater(this::showStage));
