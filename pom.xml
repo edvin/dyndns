@@ -9,8 +9,15 @@
     <name>Tornado DynDNS</name>
 
     <packaging>jar</packaging>
-    <version>1.0</version>
-
+    <version>1.0.1</version>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
     <organization>
         <!-- Used as the 'Vendor' for JNLP generation -->
         <name>Tornado</name>
@@ -68,6 +75,11 @@
             <groupId>org.dnsjava</groupId>
             <artifactId>dnsjava</artifactId>
             <version>2.1.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-artifact</artifactId>
+            <version>3.3.1</version>
         </dependency>
     </dependencies>
 

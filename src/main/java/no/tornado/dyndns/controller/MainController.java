@@ -87,6 +87,7 @@ public class MainController extends TimerTask implements Initializable {
 			record.setDomain(domain.getText());
 			record.setHostname(hostname.getText());
 			record.setPassword(password.getText());
+			record.setContent(null);
 			String master = DnsRecord.getMasterFromSoa(domain.getText());
 			if (master == null) {
 				Alert error = new Alert(Alert.AlertType.ERROR);
@@ -114,7 +115,7 @@ public class MainController extends TimerTask implements Initializable {
 		TextField hostname = (TextField) ui.lookup("#hostname");
 		TextField password = (TextField) ui.lookup("#password");
 
-		Platform.runLater(() -> ui.lookup("#domain").requestFocus());
+		Platform.runLater(domain::requestFocus);
 
 		Optional<ButtonType> pressed = alert.showAndWait();
 		if (pressed.filter(btn -> btn == OK).isPresent()) {

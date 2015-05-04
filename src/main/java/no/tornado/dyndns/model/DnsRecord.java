@@ -2,6 +2,7 @@ package no.tornado.dyndns.model;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import no.tornado.MainApp;
 import org.xbill.DNS.*;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -141,6 +142,7 @@ public class DnsRecord {
 			update.add(new ARecord(hostname, IN, 300, ip));
 
 			Message message = resolver.send(update);
+
 			if (message.getRcode() == Rcode.NOERROR) {
 				setContent(ip.toString().replace("/", ""));
 				setStatus("OK");
@@ -149,6 +151,7 @@ public class DnsRecord {
 			}
 		} catch (Exception ex) {
 			status.setValue("ERROR: " + ex.getMessage());
+			MainApp.versionCheck();
 		}
 	}
 
