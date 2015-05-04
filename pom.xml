@@ -51,6 +51,7 @@
                 <version>8.1.2</version>
                 <configuration>
                     <mainClass>no.tornado.MainApp</mainClass>
+                    <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
                     <keyStore>/Users/edvin/.keystore</keyStore>
                     <!--<keyStoreAlias>codesign</keyStoreAlias>-->
                     <!--<keyStorePassword>secret</keyStorePassword>-->
