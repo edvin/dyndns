@@ -139,6 +139,7 @@ public class DnsRecord {
 			resolver.setTimeout(60);
 
 			Update update = new Update(zone);
+			update.delete(hostname, Type.A);
 			update.add(new ARecord(hostname, IN, 300, ip));
 
 			Message message = resolver.send(update);

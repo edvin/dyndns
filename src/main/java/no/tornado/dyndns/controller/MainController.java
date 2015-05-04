@@ -153,7 +153,7 @@ public class MainController extends TimerTask implements Initializable {
 			return;
 
 		URL url;
-		try { url = new URL("http://api.ipify.org"); } catch (MalformedURLException e) { throw new RuntimeException(e); }
+		try { url = new URL("https://api.ipify.org"); } catch (MalformedURLException e) { throw new RuntimeException(e); }
 
 		try (InputStream input = url.openStream();
 		     BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
