@@ -10,27 +10,33 @@ import javax.xml.bind.annotation.XmlAttribute;
 import java.net.InetAddress;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 
 import static org.xbill.DNS.DClass.IN;
 
 @XmlAccessorType(XmlAccessType.NONE)
 public class DnsRecord {
-	private static final DateTimeFormatter fmt = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
-	private StringProperty name;
+	private static final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	private StringProperty master;
+	private StringProperty domain;
+	private StringProperty hostname;
 	private StringProperty content;
 	private StringProperty password;
 	private StringProperty status;
+	private String soaServer;
 
 	public DnsRecord() {
-		name = new SimpleStringProperty();
+		master = new SimpleStringProperty();
+		domain = new SimpleStringProperty();
+		hostname = new SimpleStringProperty();
 		content = new SimpleStringProperty();
 		password = new SimpleStringProperty();
 		status = new SimpleStringProperty();
 	}
 
-	public DnsRecord(String name, String content, String password) {
-		this.name = new SimpleStringProperty(name);
+	public DnsRecord(String master, String domain, String hostname, String content, String password) {
+		this.master = new SimpleStringProperty(master);
+		this.domain = new SimpleStringProperty(domain);
+		this.hostname = new SimpleStringProperty(hostname);
 		this.content = new SimpleStringProperty(content);
 		this.password = new SimpleStringProperty(password);
 		this.status = new SimpleStringProperty("PENDING");
@@ -49,7 +55,6 @@ public class DnsRecord {
 		this.password.set(password);
 	}
 
-	@XmlAttribute
 	public String getContent() {
 		return content.get();
 	}
@@ -63,16 +68,42 @@ public class DnsRecord {
 	}
 
 	@XmlAttribute
-	public String getName() {
-		return name.get();
+	public String getHostname() {
+		return hostname.get();
 	}
 
-	public StringProperty nameProperty() {
-		return name;
+	public StringProperty hostnameProperty() {
+		return hostname;
 	}
 
-	public void setName(String name) {
-		this.name.set(name);
+	public void setHostname(String hostname) {
+		this.hostname.set(hostname);
+	}
+
+	@XmlAttribute
+	public String getDomain() {
+		return domain.get();
+	}
+
+	public StringProperty domainProperty() {
+		return domain;
+	}
+
+	public void setDomain(String domain) {
+		this.domain.set(domain);
+	}
+
+	@XmlAttribute
+	public String getMaster() {
+		return master.get();
+	}
+
+	public StringProperty masterProperty() {
+		return master;
+	}
+
+	public void setMaster(String master) {
+		this.master.set(master);
 	}
 
 	public String getStatus() {
@@ -89,7 +120,8 @@ public class DnsRecord {
 
 	public String toString() {
 		return "DnsRecord{" +
-			"name=" + name.getValue() +
+			"hostname=" + hostname.getValue() +
+			", domain=" + domain.getValue() +
 			", content=" + content.getValue() +
 			", password=" + password.getValue() +
 			'}';
@@ -97,16 +129,16 @@ public class DnsRecord {
 
 	public void update(InetAddress ip) {
 		try {
-			Name name = Name.fromString(getName().concat("."));
-			Name zone = getName().indexOf(".") == getName().lastIndexOf(".") ? name : Name.fromString(getName().substring(getName().indexOf(".") + 1).concat("."));
+			Name zone = Name.fromString(getDomain().concat("."));
+			Name hostname = Name.fromString(getHostname().concat("."));
 
-			Resolver resolver = new SimpleResolver("ns.syse.no");
+			Resolver resolver = new SimpleResolver(getMaster());
 			resolver.setTSIGKey(new TSIG(zone.toString(true), getPassword()));
 			resolver.setTCP(true);
 			resolver.setTimeout(60);
 
 			Update update = new Update(zone);
-			update.add(new ARecord(name, IN, 10800, ip));
+			update.add(new ARecord(hostname, IN, 300, ip));
 
 			Message message = resolver.send(update);
 			if (message.getRcode() == Rcode.NOERROR) {
@@ -118,5 +150,10 @@ public class DnsRecord {
 		} catch (Exception ex) {
 			status.setValue("ERROR: " + ex.getMessage());
 		}
+	}
+
+	public static String getMasterFromSoa(String domain) throws TextParseException {
+		Record[] result = new Lookup(Name.fromString(domain.concat(".")), Type.SOA).run();
+		return result != null ? ((SOARecord) result[0]).getHost().toString(true) : null;
 	}
 }

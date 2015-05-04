@@ -25,23 +25,21 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-import static javafx.scene.control.Alert.AlertType.WARNING;
 import static javafx.scene.control.ButtonType.APPLY;
 import static javafx.scene.control.ButtonType.OK;
 
 public class MainController extends TimerTask implements Initializable {
 	@FXML TableView<DnsRecord> recordsView;
-	@FXML TableColumn<DnsRecord, String> nameCol;
+	@FXML TableColumn<DnsRecord, String> hostnameCol;
 	@FXML TableColumn<DnsRecord, String> contentCol;
 	@FXML TableColumn<DnsRecord, String> statusCol;
 	@FXML Button deleteRecord;
 	@FXML Button editRecord;
-	@FXML TextField quickAddInput;
 	ObservableList<DnsRecord> data;
 	Timer timer;
 
 	public void initialize(URL location, ResourceBundle resources) {
-		nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+		hostnameCol.setCellValueFactory(new PropertyValueFactory<>("hostname"));
 		statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
 		contentCol.setCellValueFactory(new PropertyValueFactory<>("content"));
 		deleteRecord.disableProperty().bind(Bindings.isEmpty(recordsView.getSelectionModel().getSelectedItems()));
@@ -64,28 +62,6 @@ public class MainController extends TimerTask implements Initializable {
 		recordsView.setItems(data);
 	}
 
-	public void onQuickAdd() {
-		String[] parts = quickAddInput.getText().split(":");
-		if (parts.length != 2) {
-			Alert alert = new Alert(WARNING, "Value must be on the format \"host:password\"", OK);
-			alert.setTitle("Invalid input");
-			alert.setHeaderText("Invalid format for quick add");
-			alert.show();
-		} else {
-			quickAddInput.clear();
-			if (data.stream().filter(r -> r.getName().equals(parts[0])).findAny().isPresent()) {
-				Alert alert = new Alert(WARNING, "A record can only be added once", OK);
-				alert.setTitle("Duplicate value");
-				alert.setHeaderText("This name is already in your list");
-				alert.show();
-			} else {
-				data.add(new DnsRecord(parts[0], null, parts[1]));
-				Storage.saveRecords(data);
-				onRefresh();
-			}
-		}
-	}
-
 	public void onEditRecord() throws IOException {
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
 		alert.setTitle("Edit DynDNS Record");
@@ -93,9 +69,11 @@ public class MainController extends TimerTask implements Initializable {
 		GridPane ui = new FXMLLoader().load(getClass().getResourceAsStream("/fxml/EditRecord.fxml"));
 
 		DnsRecord record = recordsView.getSelectionModel().getSelectedItem();
-		TextField name = (TextField) ui.lookup("#name");
+		TextField domain = (TextField) ui.lookup("#domain");
+		TextField hostname = (TextField) ui.lookup("#hostname");
 		TextField password = (TextField) ui.lookup("#password");
-		name.setText(record.getName());
+		domain.setText(record.getDomain());
+		hostname.setText(record.getHostname());
 		password.setText(record.getPassword());
 
 		alert.getButtonTypes().clear();
@@ -106,8 +84,19 @@ public class MainController extends TimerTask implements Initializable {
 
 		Optional<ButtonType> pressed = alert.showAndWait();
 		if (pressed.filter(btn -> btn == APPLY).isPresent()) {
-			record.setName(name.getText());
+			record.setDomain(domain.getText());
+			record.setHostname(hostname.getText());
 			record.setPassword(password.getText());
+			String master = DnsRecord.getMasterFromSoa(domain.getText());
+			if (master == null) {
+				Alert error = new Alert(Alert.AlertType.ERROR);
+				error.setTitle("Non existent SOA record");
+				error.setHeaderText("Unable to extract master from SOA record, please check domain");
+				error.show();
+				return;
+			} else {
+				record.setMaster(DnsRecord.getMasterFromSoa(domain.getText()));
+			}
 			Storage.saveRecords(data);
 			onRefresh();
 		}
@@ -118,16 +107,26 @@ public class MainController extends TimerTask implements Initializable {
 		alert.setTitle("Add new DynDNS Record");
 		alert.setHeaderText("Supply name and password for the record to add");
 		GridPane ui = new FXMLLoader().load(getClass().getResourceAsStream("/fxml/EditRecord.fxml"));
-		Platform.runLater(() -> ui.lookup("#name").requestFocus());
 
 		alert.getDialogPane().setContent(ui);
 
-		TextField name = (TextField) ui.lookup("#name");
+		TextField domain = (TextField) ui.lookup("#domain");
+		TextField hostname = (TextField) ui.lookup("#hostname");
 		TextField password = (TextField) ui.lookup("#password");
+
+		Platform.runLater(() -> ui.lookup("#domain").requestFocus());
 
 		Optional<ButtonType> pressed = alert.showAndWait();
 		if (pressed.filter(btn -> btn == OK).isPresent()) {
-			data.add(new DnsRecord(name.getText(), "", password.getText()));
+			String master = DnsRecord.getMasterFromSoa(domain.getText());
+			if (master == null) {
+				Alert error = new Alert(Alert.AlertType.ERROR);
+				error.setTitle("Non existent SOA record");
+				error.setHeaderText("Unable to extract master from SOA record, please check domain");
+				error.show();
+				return;
+			}
+			data.add(new DnsRecord(master, domain.getText(), hostname.getText(), "", password.getText()));
 			Storage.saveRecords(data);
 			onRefresh();
 		}
@@ -141,7 +140,7 @@ public class MainController extends TimerTask implements Initializable {
 		DnsRecord record = recordsView.getSelectionModel().getSelectedItem();
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
 		alert.setTitle("Confirm delete");
-		alert.setHeaderText("Confirm delete of ".concat(record.getName()));
+		alert.setHeaderText("Confirm delete of ".concat(record.getHostname()));
 		if (alert.showAndWait().get() == OK) {
 			data.remove(record);
 			Storage.saveRecords(data);

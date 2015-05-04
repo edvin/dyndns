@@ -5,35 +5,14 @@ import javafx.collections.ObservableList;
 
 import javax.xml.bind.JAXB;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 @XmlRootElement
 public class Storage {
 	List<DnsRecord> records;
-
-	public static void main(String[] args) {
-//		Storage storage = new Storage();
-//		storage.records = new ArrayList<>();
-//		storage.records.add(new DnsRecord("x", "y", "z"));
-//		storage.records.add(new DnsRecord("æ", "ø", "å"));
-//		JAXB.marshal(storage, System.out);
-
-		String data = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-			"<storage>\n" +
-			"    <records content=\"y\" name=\"x\" password=\"z\"/>\n" +
-			"    <records content=\"ø\" name=\"æ\" password=\"å\"/>\n" +
-			"</storage>";
-		ByteArrayInputStream input = new ByteArrayInputStream(data.getBytes());
-		Storage storage = JAXB.unmarshal(input, Storage.class);
-
-		System.out.println(storage.getRecords());
-
-	}
 
 	public List<DnsRecord> getRecords() {
 		return records;

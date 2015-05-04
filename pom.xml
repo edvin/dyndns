@@ -44,6 +44,10 @@
                 <version>8.1.2</version>
                 <configuration>
                     <mainClass>no.tornado.MainApp</mainClass>
+                    <keyStore>/Users/edvin/.keystore</keyStore>
+                    <!--<keyStoreAlias>codesign</keyStoreAlias>-->
+                    <!--<keyStorePassword>secret</keyStorePassword>-->
+                    <!--<allPermissions>true</allPermissions>-->
                 </configuration>
             </plugin>
             <plugin>
