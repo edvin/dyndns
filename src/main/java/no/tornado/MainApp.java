@@ -30,7 +30,7 @@ import static javafx.scene.control.Alert.AlertType.WARNING;
 import static javax.swing.SwingUtilities.invokeLater;
 
 public class MainApp extends Application {
-	public static final String Version = "1.0.1";
+	public static final String Version = "2.0.1";
 	private static Boolean showingVersionWarning = false;
 	private static Logger log = Logger.getLogger(MainApp.class.getSimpleName());
 	private Stage stage;
@@ -47,7 +47,7 @@ public class MainApp extends Application {
         Parent rootNode = loader.load(getClass().getResourceAsStream("/fxml/MainWindow.fxml"));
 	    invokeLater(this::addAppToTray);
         Scene scene = new Scene(rootNode, 800, 400);
-        stage.setTitle("Tornado DynDNS Client 2.0");
+        stage.setTitle("Tornado DynDNS Client 2.0.1");
         stage.setScene(scene);
 	    Platform.setImplicitExit(false);
 	    scheduleVersionCheck();
