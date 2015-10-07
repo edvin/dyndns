@@ -23,7 +23,6 @@ public class DnsRecord {
 	private StringProperty content;
 	private StringProperty password;
 	private StringProperty status;
-	private String soaServer;
 
 	public DnsRecord() {
 		master = new SimpleStringProperty();
@@ -148,12 +147,35 @@ public class DnsRecord {
 				setContent(ip.toString().replace("/", ""));
 				setStatus("OK");
 			} else {
-				setStatus("ERROR ".concat(Rcode.string(message.getRcode())));
+				setStatus("ERROR ".concat(extractError(message)));
 			}
 		} catch (Exception ex) {
 			status.setValue("ERROR: " + ex.getMessage());
 			MainApp.versionCheck();
 		}
+	}
+
+	/**
+	 * Extract a more meaningful error message if avialable.
+	 *
+	 * Right now we specifically look for BADTIME, which will occur if the
+	 * client clock is not in sync with the server clock.
+	 *
+	 * @param message The message object returned from the update
+	 * @return The error string
+	 */
+	private String extractError(Message message) {
+		Record[] additionals = message.getSectionArray(Section.ADDITIONAL);
+		for (Record record : additionals) {
+			if (record instanceof TSIGRecord) {
+				TSIGRecord tsigRecord = (TSIGRecord) record;
+				if (tsigRecord.getError() == 18)
+					return "Local time out of sync";
+
+				return Rcode.TSIGstring(tsigRecord.getError());
+			}
+		}
+		return Rcode.string(message.getRcode());
 	}
 
 	public static String getMasterFromSoa(String domain) throws TextParseException {

@@ -9,7 +9,8 @@
     <name>Tornado DynDNS</name>
 
     <packaging>jar</packaging>
-    <version>1.0.1</version>
+    <version>2.0.1</version>
+
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -18,9 +19,11 @@
             <comments>A business-friendly OSS license</comments>
         </license>
     </licenses>
+
     <organization>
         <!-- Used as the 'Vendor' for JNLP generation -->
         <name>Tornado</name>
+        <url>http://www.tornado.no/</url>
     </organization>
 
     <developers>
@@ -31,6 +34,11 @@
             <organization>SYSE AS</organization>
             <organizationUrl>https://www.syse.no/</organizationUrl>
             <timezone>GMT+2</timezone>
+            <roles>
+                <role>Maintainer</role>
+                <role>Developer</role>
+                <role>Architect</role>
+            </roles>
         </developer>
     </developers>
 
@@ -53,9 +61,7 @@
                     <mainClass>no.tornado.MainApp</mainClass>
                     <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
                     <keyStore>/Users/edvin/.keystore</keyStore>
-                    <!--<keyStoreAlias>codesign</keyStoreAlias>-->
-                    <!--<keyStorePassword>secret</keyStorePassword>-->
-                    <!--<allPermissions>true</allPermissions>-->
+                    <identifier>tornado-dyndns</identifier>
                 </configuration>
             </plugin>
             <plugin>
