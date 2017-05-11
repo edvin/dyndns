@@ -9,7 +9,7 @@
     <name>Tornado DynDNS</name>
 
     <packaging>jar</packaging>
-    <version>2.0.1</version>
+    <version>2.0.2</version>
 
     <licenses>
         <license>
@@ -51,18 +51,121 @@
     </repositories>
 
     <build>
-        <finalName>Tornado DynDNS</finalName>
+        <finalName>Tornado-DynDNS</finalName>
         <plugins>
+            <!-- Compile project jar to appdir -->
             <plugin>
-                <groupId>com.zenjava</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-                <version>8.1.2</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
                 <configuration>
-                    <mainClass>no.tornado.MainApp</mainClass>
-                    <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
-                    <keyStore>/Users/edvin/.keystore</keyStore>
-                    <identifier>tornado-dyndns</identifier>
+                    <outputDirectory>${app.dir}</outputDirectory>
                 </configuration>
+            </plugin>
+            <!-- Copy dependencies to appdir -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <configuration>
+                    <excludeScope>provided</excludeScope>
+                    <outputDirectory>${app.dir}</outputDirectory>
+                    <stripVersion>true</stripVersion>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.4.0</version>
+                <executions>
+                    <execution>
+                        <id>create-manifest</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>fxlauncher.CreateManifest</mainClass>
+                            <arguments>
+                                <argument>${app.url}</argument>
+                                <argument>${app.mainClass}</argument>
+                                <argument>${app.dir}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>embed-manifest-in-launcher</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>jar</executable>
+                            <workingDirectory>${app.dir}</workingDirectory>
+                            <arguments>
+                                <argument>uf</argument>
+                                <argument>fxlauncher.jar</argument>
+                                <argument>app.xml</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>installer</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>javapackager</executable>
+
+                            <arguments>
+                                <argument>-deploy</argument>
+                                <argument>-native</argument>
+                                <argument>-outdir</argument>
+                                <argument>${app.installerdir}</argument>
+                                <argument>-outfile</argument>
+                                <argument>${app.filename}</argument>
+                                <argument>-srcdir</argument>
+                                <argument>${app.dir}</argument>
+                                <argument>-srcfiles</argument>
+                                <argument>fxlauncher.jar</argument>
+                                <argument>-appclass</argument>
+                                <argument>fxlauncher.Launcher</argument>
+                                <argument>-name</argument>
+                                <argument>${project.name}</argument>
+                                <argument>-title</argument>
+                                <argument>${project.name}</argument>
+                                <argument>-vendor</argument>
+                                <argument>${app.vendor}</argument>
+                                <argument>-BappVersion=${app.version}</argument>
+                                <argument>-Bicon=src/main/resources/cube.ico</argument>
+                                <argument>-Bidentifier=${project.groupId}.${project.artifactId}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>deploy</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>scp</executable>
+                            <arguments>
+                                <argument>-r</argument>
+                                <argument>target/app/.</argument>
+                                <argument>${app.deploy.target}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -84,10 +187,21 @@
             <version>2.1.7</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-artifact</artifactId>
-            <version>3.3.1</version>
+            <groupId>no.tornado</groupId>
+            <artifactId>fxlauncher</artifactId>
+            <version>1.0.16</version>
         </dependency>
     </dependencies>
 
+    <properties>
+        <app.filename>Tornado-DynDNS</app.filename>
+        <app.mainClass>no.tornado.MainApp</app.mainClass>
+        <app.vendor>Tornado</app.vendor>
+        <app.version>2.0</app.version>
+        <app.url>https://static.tornado.no/dyndns/</app.url>
+        <app.deploy.target>w48839@fxldemo.tornado.no:www/dyndns</app.deploy.target>
+        <app.dir>${project.build.directory}/app</app.dir>
+        <app.installerdir>${project.build.directory}/installer</app.installerdir>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 </project>
