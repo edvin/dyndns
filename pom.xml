@@ -42,14 +42,6 @@
         </developer>
     </developers>
 
-    <repositories>
-        <repository>
-            <id>no.tornado</id>
-            <name>Tornado Nexus Repository</name>
-            <url>http://tornado.no:1080/nexus/content/repositories/releases</url>
-        </repository>
-    </repositories>
-
     <build>
         <finalName>Tornado-DynDNS</finalName>
         <plugins>
